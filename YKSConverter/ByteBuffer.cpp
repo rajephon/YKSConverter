@@ -1,6 +1,5 @@
 //
 //  ByteBuffer.cpp
-//  YKSConverterSample
 //
 //  Created by Chanwoo Noh on 2018. 6. 2..
 //  Copyright © 2018년 Chanwoo Noh. All rights reserved.
