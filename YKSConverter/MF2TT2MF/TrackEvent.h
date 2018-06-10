@@ -3,12 +3,12 @@
  All rights reserved.
  */
 
-#ifndef TrackEvent_hpp
-#define TrackEvent_hpp
+#ifndef TrackEvent_h
+#define TrackEvent_h
 
 #include <string>
 
-#include "ByteBuffer.h"
+#include "../ByteBuffer.h"
 
 namespace YKS {
 namespace TE {
@@ -136,4 +136,4 @@ public:
 } // namespace TE;
 } // namespace YKS;
 
-#endif /* TrackEvent_hpp */
+#endif /* TrackEvent_h */

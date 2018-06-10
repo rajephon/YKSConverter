@@ -3,8 +3,8 @@
  All rights reserved.
  */
 
-#ifndef TrackBuilder_hpp
-#define TrackBuilder_hpp
+#ifndef TrackBuilder_h
+#define TrackBuilder_h
 
 #include <vector>
 #include <memory>
@@ -35,4 +35,4 @@ namespace YKS {
 }
 
 
-#endif /* TrackBuilder_hpp */
+#endif /* TrackBuilder_h */

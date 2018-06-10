@@ -4,11 +4,11 @@
 //  Copyright © 2018년 Chanwoo Noh. All rights reserved.
 //
 
-#ifndef MF2TT2MF_hpp
-#define MF2TT2MF_hpp
+#ifndef MF2TT2MF_h
+#define MF2TT2MF_h
 
 #include "TrackEvent.h"
-#include "TrackBuilder.hpp"
+#include "TrackBuilder.h"
 
 #include <memory>
 #include <vector>
@@ -36,4 +36,4 @@ private:
 };
     
 } // namespace YKS
-#endif /* MF2TT2MF_hpp */
+#endif /* MF2TT2MF_h */

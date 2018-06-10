@@ -5,8 +5,8 @@
 //  Copyright © 2018년 Chanwoo Noh. All rights reserved.
 //
 
-#ifndef Util_hpp
-#define Util_hpp
+#ifndef YKSByteBuffer_h
+#define YKSByteBuffer_h
 
 #include <vector>
 #include <memory>
@@ -114,4 +114,4 @@ private:
     
 }
 
-#endif /* Util_hpp */
+#endif /* YKSByteBuffer_h */

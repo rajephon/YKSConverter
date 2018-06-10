@@ -3,8 +3,8 @@
  All rights reserved.
  */
 
-#ifndef __YKSCONVERTER__H__
-#define __YKSCONVERTER__H__
+#ifndef YKSCONVERTER_h
+#define YKSCONVERTER_h
 
 #include <string>
 #include <memory>
@@ -37,4 +37,4 @@ private:
     uint32_t _timebase;
 };
 
-#endif /* defined(__YKSCONVERTER__H__) */
+#endif /* YKSCONVERTER_h */

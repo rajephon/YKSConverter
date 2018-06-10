@@ -1,3 +1,8 @@
+# gtest
 main.cpp
 tests/
 gtest/
+
+# CMake
+build/
+release/
