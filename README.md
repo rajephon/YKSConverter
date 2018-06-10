@@ -27,7 +27,7 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
-### CMake build
+### CMake
 just simply
 ```bash
 # go to project directory
