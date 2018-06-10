@@ -2,6 +2,10 @@
 YKSConverter is a tool to convert Mabinogi MML (PSG Basic) to MIDI.  
 Implementation based on PSGConverter. [logue's PSGConverter](https://github.com/logue/PSGConverter)
 
+### Usage
+- just copy the YKSConverter folder to your build tree and use a C++11 compiler.
+- or Build library with cmake 
+
 ### Example
 ```C++
 #include <iostream>
@@ -22,6 +26,18 @@ int main(int argc, const char * argv[]) {
     return 0;
 }
 ```
+
+### CMake build
+just simply
+```bash
+# go to project directory
+mkdir build
+cd build
+cmake ..
+make
+make install
+```
+Install destination: `${ProjectDirectory}/release/`
 
 ## License
 

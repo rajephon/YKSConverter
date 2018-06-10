@@ -37,4 +37,3 @@ install(TARGETS YKSConverter
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     PUBLIC_HEADER DESTINATION include)
-# target_include_directories(YKSConverter PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
