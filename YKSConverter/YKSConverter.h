@@ -15,9 +15,9 @@
 
 class YKSConverter : public std::enable_shared_from_this<YKSConverter> {
 public:
-    YKSConverter(const std::string &mml = "") {
+    YKSConverter(const std::string &mml = "", uint8_t inst = 1) {
         _mml = {mml};
-        _inst = { 1 };
+        _inst = { inst };
         _timebase = START_TIMEBASE;
     }
     YKSConverter(const std::vector<std::string> &mml, const std::vector<uint8_t> &inst) {
