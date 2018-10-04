@@ -70,7 +70,7 @@ bool MF2TT2MF::fromMML(const std::string &mmls) {
     auto effect = _effect;
     for (int i = 0; i < trackList.size(); i++) {
         auto builder = std::make_shared<YKS::TrackBuilder>(ch);
-        if (i == 0) {
+        if (ch == 1 && i == 0) { // 첫 번째 채널, 첫 번째 트랙에만 헤더를 붙여준다.
             std::vector<uint8_t> seqSpec = {0x00, 0x00, 0x41};
             std::vector<uint8_t> sysEx = {0xf0, 0x41, 0x10, 0x42, 0x12, 0x40, 0x00, 0x7f, 0x00, 0x41, 0xf7};
             builder->putEvent(std::make_shared<YKS::TE::SeqSpec>(seqSpec))
