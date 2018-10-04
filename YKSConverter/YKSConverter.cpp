@@ -7,62 +7,64 @@
 #include "MF2TT2MF/MF2TT2MF.h"
 
 std::shared_ptr<YKS::ByteBuffer> YKSConverter::toBuffer() {
-    auto mf2tt2mf = std::make_shared<YKS::MF2TT2MF>();
-    if (!mf2tt2mf->fromMML(_mml)) {
+    if (_mml.size() != _inst.size()) {
+        std::cerr << "MML 갯수와 익기 갯수가 다릅니다.\n";
         return nullptr;
     }
-    
-    auto trackEventList = mf2tt2mf->build();
-    if (trackEventList.empty()) {
-        return nullptr;
-    }
-
-    std::vector<uint8_t> defaultBuffer = { 0x00, 0x00, 0x00, 0x06, 0x00 };
-    
     auto byteBuffer = std::make_shared<YKS::ByteBuffer>();
+    /**
+     * Header Chunk
+     **/
+    std::vector<uint8_t> defaultBuffer = { 0x00, 0x00, 0x00, 0x06, 0x00 };
     byteBuffer->putString("MThd");
     byteBuffer->putBytes(&defaultBuffer[0], (uint32_t)defaultBuffer.size());
-    // track exist check 1 : 0
-    byteBuffer->putByte((trackEventList.size() > 1)? 1 : 0);
+    // 1 byte. format. 0: single track, 1: multiple tracks, 2: multiple song
+    byteBuffer->putByte(1);
     // track size 2 bytes
-    byteBuffer->put<uint16_t>(trackEventList.size());
+    byteBuffer->put<uint16_t>(_mml.size() * 3);
     // timebase 2 bytes
     byteBuffer->put<uint16_t>(_timebase);
     
-    for (const auto &eventList : trackEventList) {
-        uint32_t time = 0;
-        byteBuffer->putString("MTrk");
-        auto trackBuffer = std::make_shared<YKS::ByteBuffer>();
-        
-        uint8_t last = 0x00;
-        
-        for (const auto &event : eventList) {
-            uint32_t deltaTime = event->leadTime() - time;
-            time = event->leadTime();
-            trackBuffer->putBytes(_writeVarLen(deltaTime));
-            
-            auto eventBuffer = event->toBuffer();
-            if (eventBuffer->size() <= 0) {
-                std::cerr << "Event Convert error.";
-                std::cerr << event->value();
-                continue;
-            }
-            // repetition, same event, same channel, omit first byte (smaller file size)
-            // from http://valentin.dasdeck.com/midi/ midi.class.php
-            // thx Valentin Schmidt
-            uint8_t start = eventBuffer->get(0);
-            if (start < 0x80 || start > 0xef || start != last) {
-                trackBuffer->putByte(start);
-            }
-            for (int i = 1; i < eventBuffer->size(); i++) {
-                trackBuffer->putByte(eventBuffer->get(i));
-            }
-            last = start;
+    for (int i = 0; i < _mml.size(); i++) {
+        // unsigned int ch = 1, unsigned int inst = 1, unsigned int pan = 64, unsigned int effect = 0
+        auto mf2tt2mf = std::make_shared<YKS::MF2TT2MF>(i+1, _inst[i]);
+        if (!mf2tt2mf->fromMML(_mml[i])) {
+            return nullptr;
         }
-        uint32_t trackLength = trackBuffer->size();
-        byteBuffer->put<uint32_t>(trackLength)->putBytes(trackBuffer);
+        auto trackEventList = mf2tt2mf->build();
+        
+        for (const auto &eventList : trackEventList) {
+            uint32_t time = 0;
+            uint8_t last = 0x00;
+            auto trackBuffer = std::make_shared<YKS::ByteBuffer>();
+            for (const auto &event : eventList) {
+                uint32_t deltaTime = event->leadTime() - time;
+                time = event->leadTime();
+                trackBuffer->putBytes(_writeVarLen(deltaTime));
+                
+                auto eventBuffer = event->toBuffer();
+                if (eventBuffer->size() <= 0) {
+                    std::cerr << "Event Convert error.";
+                    std::cerr << event->value();
+                    continue;
+                }
+                // repetition, same event, same channel, omit first byte (smaller file size)
+                // from http://valentin.dasdeck.com/midi/ midi.class.php
+                // thx Valentin Schmidt
+                uint8_t start = eventBuffer->get(0);
+                if (start < 0x80 || start > 0xef || start != last) {
+                    trackBuffer->putByte(start);
+                }
+                for (int i = 1; i < eventBuffer->size(); i++) {
+                    trackBuffer->putByte(eventBuffer->get(i));
+                }
+                last = start;
+            }
+            byteBuffer->putString("MTrk");
+            uint32_t trackLength = trackBuffer->size();
+            byteBuffer->put<uint32_t>(trackLength)->putBytes(trackBuffer);
+        }
     }
-    
     return byteBuffer;
 }
 
