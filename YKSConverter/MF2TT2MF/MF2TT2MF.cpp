@@ -10,6 +10,7 @@
 #include <math.h>
 
 #define REGEX_MML "(MML@)\\s*([\\s0-9a-glnortvA-GLNORTV#<>.&+-]*),\\s*([\\s0-9a-glnortvA-GLNORTV#<>.&+-]*),\\s*([\\s0-9a-glnortvA-GLNORTV#<>.&+-]*);"
+#define MIN_VOLUME 1
 #define MAX_VOLUME 15
 #define MAX_OCTAVE 9
 
@@ -77,13 +78,14 @@ bool MF2TT2MF::fromMML(const std::string &mmls) {
             ->putEvent(std::make_shared<YKS::TE::MetaText>("Yokoso Project(https://yoko.so/)"))
             ->putEvent(std::make_shared<YKS::TE::Tempo>(500000))
             ->putEvent(std::make_shared<YKS::TE::SysEx>(sysEx));
-        }else if (trackList.at(i).empty()) {
-            continue;
         }
         builder->putEvent(std::make_shared<YKS::TE::PrCh>(ch, inst)->leadTime(192))
         ->putEvent(std::make_shared<YKS::TE::Par>(ch, 10, pan)->leadTime(193))
-        ->putEvent(std::make_shared<YKS::TE::Par>(ch, 91, effect)->leadTime(194))
-        ->putEvent(_parseTrack(trackList.at(i), 384));
+        ->putEvent(std::make_shared<YKS::TE::Par>(ch, 91, effect)->leadTime(194));
+        
+        if (!trackList.at(i).empty()) {
+            builder->putEvent(_parseTrack(trackList.at(i), 384));
+        }
         _trackBuilder.push_back(builder);
     }
     
@@ -164,9 +166,12 @@ std::vector<std::shared_ptr<YKS::TE::TrackEvent>> MF2TT2MF::_parseTrack(std::str
                 tempo = floor(60000000 / value);
                 eventList.push_back(std::make_shared<YKS::TE::Tempo>(tempo)->leadTime(deltaTime));
             }else if (op == "v" || op == "V") {
-                if (value >= 0 && value <= MAX_VOLUME) {
-                    volume = value;
+                if (value < MIN_VOLUME) {
+                    value = MIN_VOLUME;
+                }else if (value > MAX_VOLUME) {
+                    value = MAX_VOLUME;
                 }
+                volume = value;
             }else if (op == "<") {
                 if (octave <= 0) {
                     octave = 0;
