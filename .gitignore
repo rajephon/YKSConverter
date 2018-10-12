@@ -1,5 +1,7 @@
 # gtest
 main.cpp
+YKSLibrary.hpp
+YKSLibrary.cpp
 tests/
 gtest/
 
