@@ -85,6 +85,8 @@ bool MF2TT2MF::fromMML(const std::string &mmls) {
         
         if (!trackList.at(i).empty()) {
             builder->putEvent(_parseTrack(trackList.at(i), 384));
+        }else {
+            builder->putEvent(std::make_shared<YKS::TE::MetaTrkEnd>()->leadTime(385));
         }
         _trackBuilder.push_back(builder);
     }
