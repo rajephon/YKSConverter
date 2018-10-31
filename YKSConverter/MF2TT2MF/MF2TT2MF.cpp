@@ -16,11 +16,11 @@
 
 namespace YKS {
 
-MF2TT2MF::MF2TT2MF(unsigned int ch, unsigned int inst, unsigned int pan, unsigned int effect) {
+MF2TT2MF::MF2TT2MF(unsigned int ch, unsigned int inst, unsigned int pan, unsigned int reverb) {
     _ch = ch;
     _inst = inst;
     _pan = pan;
-    _effect = effect;
+    _reverb = reverb;
     
     _minNote = 0;
     _maxNote = 96;
@@ -68,7 +68,7 @@ bool MF2TT2MF::fromMML(const std::string &mmls) {
     auto ch = _ch;
     auto inst = _inst;
     auto pan = _pan;
-    auto effect = _effect;
+    auto reverb = _reverb;
     for (int i = 0; i < trackList.size(); i++) {
         auto builder = std::make_shared<YKS::TrackBuilder>(ch);
         if (ch == 1 && i == 0) { // 첫 번째 채널, 첫 번째 트랙에만 헤더를 붙여준다.
@@ -79,7 +79,7 @@ bool MF2TT2MF::fromMML(const std::string &mmls) {
         }
         builder->putEvent(std::make_shared<YKS::TE::PrCh>(ch, inst)->leadTime(192))
         ->putEvent(std::make_shared<YKS::TE::Par>(ch, 10, pan)->leadTime(193))
-        ->putEvent(std::make_shared<YKS::TE::Par>(ch, 91, effect)->leadTime(194));
+        ->putEvent(std::make_shared<YKS::TE::Par>(ch, 91, reverb)->leadTime(194));
         
         if (!trackList.at(i).empty()) {
             builder->putEvent(_parseTrack(trackList.at(i), 384));
