@@ -8,14 +8,6 @@ set -e
 echo "=== YKSConverter Output Comparison ==="
 echo
 
-# Test cases
-declare -a TEST_CASES=(
-    "MML@c,,;"
-    "MML@t120l4cdefgab>c4.,,;"
-    "MML@t190l8cdefgab>c4.,l8<cdefgab>c4.,l8>cdefgab>c4.;"
-    "MML@t180l8ccccccc4,l8eeeeeee4,l8ggggggg4;"
-)
-
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -52,56 +44,86 @@ cd ..
 echo -e "${GREEN}✅ Both versions built successfully${NC}"
 echo
 
-# Function to compare outputs
-compare_output() {
-    local mml="$1"
-    local test_name="$2"
-    
-    echo -e "${BLUE}Testing: $test_name${NC}"
-    echo "MML: $mml"
+# Function to compare baseline test outputs
+compare_baseline_outputs() {
+    echo -e "${BLUE}Comparing baseline test outputs...${NC}"
     
     # Generate C++ output
     cd cpp/build
-    if ! ./test_baseline "$mml" > cpp_output.txt 2>&1; then
-        echo -e "${RED}❌ C++ version failed${NC}"
-        cd ../..
-        return 1
-    fi
-    
-    # Extract hex from C++ output (assuming it's in the output)
-    CPP_HEX=$(grep -E '^[0-9a-f]+$' cpp_output.txt | head -1 | tr -d ' \n')
+    ./test_baseline > cpp_baseline_output.txt 2>&1
     cd ../..
     
     # Generate Rust output  
     cd rust
-    RUST_HEX=$(cargo run --release -- "$mml" 2>/dev/null | grep -E '^[0-9a-f]+$' | head -1 | tr -d ' \n')
+    cargo run --release --bin test_baseline > rust_baseline_output.txt 2>&1
     cd ..
     
-    # Compare outputs
-    if [ "$CPP_HEX" = "$RUST_HEX" ]; then
-        echo -e "${GREEN}✅ PASS - Outputs match exactly${NC}"
-        echo "Length: ${#CPP_HEX} characters"
-        ((PASSED++))
-    else
-        echo -e "${RED}❌ FAIL - Outputs differ${NC}"
-        echo "C++  length: ${#CPP_HEX} characters"
-        echo "Rust length: ${#RUST_HEX} characters"
-        
-        if [ ${#CPP_HEX} -gt 0 ] && [ ${#RUST_HEX} -gt 0 ]; then
-            echo "First 100 chars:"
-            echo "C++:  ${CPP_HEX:0:100}..."
-            echo "Rust: ${RUST_HEX:0:100}..."
+    # Compare generated MIDI files
+    local files_match=true
+    
+    if [ -f "cpp/build/test1_simple_single.midi" ] && [ -f "rust/test1_simple_single_rust.midi" ]; then
+        if ! cmp -s "cpp/build/test1_simple_single.midi" "rust/test1_simple_single_rust.midi"; then
+            echo -e "${RED}❌ FAIL - test1_simple_single.midi files differ${NC}"
+            files_match=false
+            ((FAILED++))
+        else
+            echo -e "${GREEN}✅ PASS - test1_simple_single.midi files match${NC}"
+            ((PASSED++))
         fi
+    else
+        echo -e "${RED}❌ FAIL - test1_simple_single.midi files not found${NC}"
+        files_match=false
         ((FAILED++))
     fi
     
-    echo
+    if [ -f "cpp/build/test2_multi_track.midi" ] && [ -f "rust/test2_multi_track_rust.midi" ]; then
+        if ! cmp -s "cpp/build/test2_multi_track.midi" "rust/test2_multi_track_rust.midi"; then
+            echo -e "${RED}❌ FAIL - test2_multi_track.midi files differ${NC}"
+            files_match=false
+            ((FAILED++))
+        else
+            echo -e "${GREEN}✅ PASS - test2_multi_track.midi files match${NC}"
+            ((PASSED++))
+        fi
+    else
+        echo -e "${RED}❌ FAIL - test2_multi_track.midi files not found${NC}"
+        files_match=false
+        ((FAILED++))
+    fi
+    
+    if [ -f "cpp/build/test3_readme_example.midi" ] && [ -f "rust/test3_readme_example_rust.midi" ]; then
+        if ! cmp -s "cpp/build/test3_readme_example.midi" "rust/test3_readme_example_rust.midi"; then
+            echo -e "${RED}❌ FAIL - test3_readme_example.midi files differ${NC}"
+            files_match=false
+            ((FAILED++))
+        else
+            echo -e "${GREEN}✅ PASS - test3_readme_example.midi files match${NC}"
+            ((PASSED++))
+        fi
+    else
+        echo -e "${RED}❌ FAIL - test3_readme_example.midi files not found${NC}"
+        files_match=false
+        ((FAILED++))
+    fi
+    
+    if [ -f "cpp/build/test4_empty_tracks.midi" ] && [ -f "rust/test4_empty_tracks_rust.midi" ]; then
+        if ! cmp -s "cpp/build/test4_empty_tracks.midi" "rust/test4_empty_tracks_rust.midi"; then
+            echo -e "${RED}❌ FAIL - test4_empty_tracks.midi files differ${NC}"
+            files_match=false
+            ((FAILED++))
+        else
+            echo -e "${GREEN}✅ PASS - test4_empty_tracks.midi files match${NC}"
+            ((PASSED++))
+        fi
+    else
+        echo -e "${RED}❌ FAIL - test4_empty_tracks.midi files not found${NC}"
+        files_match=false
+        ((FAILED++))
+    fi
 }
 
-# Run test cases
-for i in "${!TEST_CASES[@]}"; do
-    compare_output "${TEST_CASES[$i]}" "Test $((i+1))"
-done
+# Run baseline comparison
+compare_baseline_outputs
 
 # Run Rust test suite
 echo -e "${BLUE}Running Rust test suite...${NC}"
