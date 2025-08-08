@@ -21,8 +21,8 @@ install_manifest.txt
 
 # Rust specific
 # Cargo
-target/
-Cargo.lock
+**/target/
+**/Cargo.lock
 
 # Rust build artifacts
 **/*.rs.bk
