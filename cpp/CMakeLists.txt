@@ -37,3 +37,7 @@ install(TARGETS YKSConverter
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     PUBLIC_HEADER DESTINATION include)
+
+# Test baseline executable
+add_executable(test_baseline test_baseline.cpp)
+target_link_libraries(test_baseline YKSConverter)
