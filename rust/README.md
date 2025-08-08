@@ -10,7 +10,29 @@ cargo build --release
 
 ## Usage
 
-### As Library
+### Command Line Tool
+
+Clone and run directly:
+```bash
+git clone https://github.com/rajephon/YKSConverter.git
+cd YKSConverter/rust
+cargo run --bin yks_converter -- "MML@t120l4cdefg,,;"
+```
+
+This generates `output.midi` in the current directory.
+
+More examples:
+```bash
+# Simple melody
+cargo run --bin yks_converter -- "MML@t120l4cdefg,,;"
+
+# Complex multi-track piece  
+cargo run --bin yks_converter -- "MML@t190l8cdefgab>c4.,l8<cdefgab>c4.,l8>cdefgab>c4.;"
+```
+
+### Library Usage
+
+### Single Track Example
 ```rust
 use yks_converter::YksConverter;
 
@@ -24,9 +46,35 @@ fn main() {
 }
 ```
 
-### Command Line
+### Multi-Track Example
+```rust
+use yks_converter::YksConverter;
+
+fn main() {
+    let mml_tracks = vec![
+        "MML@t180l8ccccccc4,l8eeeeeee4,l8ggggggg4;".to_string(),
+        "MML@t180l8>ccccccc4,l8>eeeeeee4,l8>ggggggg4;".to_string(),
+    ];
+    let instruments = vec![26, 74]; // MIDI instrument codes
+    
+    let converter = YksConverter::new_multi(mml_tracks, instruments);
+    if let Some(buffer) = converter.to_buffer() {
+        std::fs::write("ensemble.midi", buffer.as_slice()).unwrap();
+    }
+}
+```
+
+### Adding to Your Project
+
+Add to your `Cargo.toml`:
+```toml
+[dependencies]
+yks_converter = "0.1.0"
+```
+
+Or use cargo:
 ```bash
-cargo run -- "MML@t120l4cdefgab>c4.,,;"
+cargo add yks_converter
 ```
 
 ## Testing
