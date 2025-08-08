@@ -26,7 +26,7 @@ fn main() {
     
     // Test Case 1: Simple single track
     println!("Test 1: Simple single track");
-    let mml1 = "MML@t120l4cdefgab>c4.,,,;".to_string();
+    let mml1 = "MML@t120l4cdefgab>c4.,,;".to_string();
     let converter1 = YksConverter::new(mml1, 1);
     if let Some(buffer1) = converter1.to_buffer() {
         write_buffer_to_file(&buffer1, "test1_simple_single_rust.midi").unwrap();

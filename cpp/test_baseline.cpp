@@ -29,7 +29,7 @@ int main() {
     
     // Test Case 1: Simple single track
     std::cout << "Test 1: Simple single track" << std::endl;
-    std::string mml1 = "MML@t120l4cdefgab>c4.,,,;";
+    std::string mml1 = "MML@t120l4cdefgab>c4.,,;";
     auto converter1 = std::make_shared<YKSConverter>(mml1, 1);
     auto buffer1 = converter1->toBuffer();
     if (buffer1) {
