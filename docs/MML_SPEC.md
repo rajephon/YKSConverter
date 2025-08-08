@@ -28,7 +28,7 @@ MML@t190l8cdefgab>c4.,l8<cdefgab>c4.,l8>cdefgab>c4.;
 Examples: `c+`, `d#`, `e-`
 
 ### Octaves
-- `o<number>` - Set octave (0-9), e.g., `o4` 
+- `o<number>` - Set octave (1-10), e.g., `o4` 
 - `<` - Decrease octave by 1
 - `>` - Increase octave by 1
 
@@ -50,6 +50,7 @@ Default octave is 4 (middle C = C4).
 - `.` - Extend note duration by 50%
   - `c4.` - Dotted quarter note (144 ticks)
   - `l8.` - Set default to dotted eighth notes
+  - Multiple dots have no additional effect (additional dots are ignored)
 
 ### Tempo
 - `t<number>` - Set tempo in BPM
@@ -114,7 +115,7 @@ MML@t190l8cdefgab>c4.,l8<cdefgab>c4.,l8>cdefgab>c4.;
 - Empty tracks are allowed: `MML@c,,;` (only first track has notes)
 - Whitespace is ignored in MML strings  
 - Invalid tokens are skipped
-- Default values: octave=4, volume=8, length=quarter note
+- Default values: tempo=120, octave=4, volume=8, length=quarter note
 - Tempo changes affect all subsequent notes in all tracks
 
 ## Regular Expressions

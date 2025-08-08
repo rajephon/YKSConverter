@@ -14,7 +14,7 @@ make install  # Optional: installs to ../release/
 
 ### Manual Compilation
 ```bash
-g++ -std=c++11 -I. YKSConverter/*.cpp MF2TT2MF/*.cpp -o yks_converter
+g++ -std=c++11 -I. YKSConverter/*.cpp YKSConverter/MF2TT2MF/*.cpp -o yks_converter
 ```
 
 ## Usage
@@ -50,7 +50,7 @@ int main() {
 
 Run baseline tests to verify output:
 ```bash
-g++ -std=c++11 test_baseline.cpp YKSConverter/*.cpp MF2TT2MF/*.cpp -o test_baseline
+g++ -std=c++11 test_baseline.cpp YKSConverter/*.cpp YKSConverter/MF2TT2MF/*.cpp -o test_baseline
 ./test_baseline
 ```
 
