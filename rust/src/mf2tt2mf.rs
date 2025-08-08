@@ -1,11 +1,16 @@
 use crate::track_event::*;
 use crate::track_builder::TrackBuilder;
+use crate::constants::{mml, midi, sysex, control_change, event_timing, timing};
 use regex::Regex;
 use std::collections::HashMap;
 
-const MIN_VOLUME: u8 = 1;
-const MAX_VOLUME: u8 = 15;
-const MAX_OCTAVE: u8 = 9;
+// Keep original constants for compatibility (marked as used to avoid dead code warnings)
+#[allow(dead_code)]
+const MIN_VOLUME: u8 = mml::MIN_VOLUME;
+#[allow(dead_code)]
+const MAX_VOLUME: u8 = mml::MAX_VOLUME;
+#[allow(dead_code)]
+const MAX_OCTAVE: u8 = mml::MAX_OCTAVE;
 
 pub struct Mf2tt2mf {
     channel: u8,
@@ -93,11 +98,9 @@ impl Mf2tt2mf {
             let mut builder = TrackBuilder::new(ch);
             
             if ch == 1 && i == 0 {
-                let sys_ex_data = vec![0x41, 0x10, 0x42, 0x12, 0x40, 0x00, 0x7f, 0x00, 0x41, 0xf7];
-                
-                let meta_text = Box::new(MetaText::new("Yokoso Project(https://yoko.so/)".to_string()));
-                let tempo = Box::new(Tempo::new(500000));
-                let sys_ex = Box::new(SysEx::new(sys_ex_data));
+                let meta_text = Box::new(MetaText::new(sysex::YOKOSO_META_TEXT.to_string()));
+                let tempo = Box::new(Tempo::new(midi::DEFAULT_TEMPO_MICROSECONDS));
+                let sys_ex = Box::new(SysEx::new(sysex::YOKOSO_SYSEX_DATA.to_vec()));
                 
                 builder.put_event(meta_text);
                 builder.put_event(tempo);
@@ -105,23 +108,23 @@ impl Mf2tt2mf {
             }
 
             let mut prog_change = Box::new(ProgramChange::new(ch, inst));
-            prog_change.set_lead_time(192);
+            prog_change.set_lead_time(event_timing::PROGRAM_CHANGE_OFFSET);
             builder.put_event(prog_change);
 
-            let mut pan_control = Box::new(ControlChange::new(ch, 10, pan));
-            pan_control.set_lead_time(193);
+            let mut pan_control = Box::new(ControlChange::new(ch, control_change::PAN, pan));
+            pan_control.set_lead_time(event_timing::PAN_CONTROL_OFFSET);
             builder.put_event(pan_control);
 
-            let mut reverb_control = Box::new(ControlChange::new(ch, 91, reverb));
-            reverb_control.set_lead_time(194);
+            let mut reverb_control = Box::new(ControlChange::new(ch, control_change::REVERB, reverb));
+            reverb_control.set_lead_time(event_timing::REVERB_CONTROL_OFFSET);
             builder.put_event(reverb_control);
 
             if !track.is_empty() {
-                let track_events = self.parse_track(track, 384);
+                let track_events = self.parse_track(track, event_timing::TRACK_START_TIME);
                 builder.put_events(track_events);
             } else {
                 let mut end_track = Box::new(EndOfTrack::new());
-                end_track.set_lead_time(385);
+                end_track.set_lead_time(event_timing::EMPTY_TRACK_END_TIME);
                 builder.put_event(end_track);
             }
 
@@ -137,16 +140,16 @@ impl Mf2tt2mf {
         let mut events: Vec<Box<dyn TrackEvent>> = Vec::new();
         let mut delta_time = lead_time;
         
-        // C++ algorithm state variables
-        let mut note_time = 96u32; // Current note duration (quarter note = 96 ticks)
-        let mut octave = 4i32;     // Current octave
-        let mut volume = 8i32;     // Current volume (1-15)
-        let mut curr_note = 0i32; // For tie processing
-        let mut is_tied = false; // Tie state
+        // C++ algorithm state variables using constants
+        let mut note_time = timing::TICKS_PER_QUARTER_NOTE; // Current note duration (quarter note = 96 ticks)
+        let mut octave = mml::DEFAULT_OCTAVE;               // Current octave
+        let mut volume = mml::DEFAULT_VOLUME;               // Current volume (1-15)
+        let mut curr_note = 0i32;                           // For tie processing
+        let mut is_tied = false;                            // Tie state
         
-        // C++ time constants
-        let semibreve = note_time * 4; // Whole note = 384 ticks
-        let minim = note_time * 2;     // Half note = 192 ticks
+        // C++ time constants using defined constants
+        let semibreve = timing::TICKS_PER_WHOLE_NOTE; // Whole note = 384 ticks
+        let minim = timing::TICKS_PER_HALF_NOTE;      // Half note = 192 ticks
         
         // Step 1: Remove whitespace (C++ line 115-116)
         let clean_track = track.chars().filter(|c| !c.is_whitespace()).collect::<String>();
@@ -287,7 +290,7 @@ impl Mf2tt2mf {
                     if !is_tied {
                         // Generate Note On (C++ line 232)
                         let note_number = note as u8;
-                        let velocity = (8 * volume) as u8;
+                        let velocity = (mml::VELOCITY_MULTIPLIER * volume) as u8;
                         let mut note_on: Box<dyn TrackEvent> = Box::new(NoteOn::new(self.channel, note_number, velocity));
                         note_on.set_lead_time(delta_time);
                         events.push(note_on);

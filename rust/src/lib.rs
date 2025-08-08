@@ -3,9 +3,12 @@ pub mod track_event;
 pub mod track_builder;
 pub mod mf2tt2mf;
 pub mod yks_converter;
+pub mod errors;
+pub mod constants;
 
 pub use yks_converter::YksConverter;
 pub use byte_buffer::ByteBuffer;
+pub use errors::ConversionError;
 
 #[cfg(test)]
 mod tests {
@@ -99,7 +102,6 @@ mod tests {
     #[test] 
     fn should_parse_single_note_c() {
         use crate::mf2tt2mf::Mf2tt2mf;
-        use crate::track_event::{NoteOn, NoteOff};
         
         let mut parser = Mf2tt2mf::new(1, 1, 64, 0);
         let mml = "MML@c,,;"; // Simple single note C with 3 tracks
