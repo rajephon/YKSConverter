@@ -52,82 +52,23 @@ make
 ```bash
 cd rust
 cargo build --release
-cargo run -- "MML@t120l4cdefgab>c4.,,;"
+cargo run --bin yks_converter -- "MML@t120l4cdefgab>c4.,,;"
 ```
 
-## Examples
+## Usage Examples
 
-### MML for single
-```C++
-#include <iostream>
-#include <memory>
-#include <fstream>
-#include <inttypes.h>
-#include "YKSConverter/YKSConverter.h"
+### C++ Implementation
+See [cpp/README.md](cpp/README.md) for detailed usage examples including:
+- Single track conversion
+- Multi-track ensemble
+- CMake build instructions
+- Command line usage
 
-int main(int argc, const char * argv[]) {
-    std::string txtMML = "MML@t190l8cdefgab>c4.,l8<cdefgab>c4.,l8>cdefgab>c4.;";
-    int inst = 1; // instrument code.
-    auto yksConverter = std::make_shared<YKSConverter>(txtMML, inst);
-    auto buffer = yksConverter->toBuffer();
-    std::ofstream out("./output.midi");
-    for (int i = 0; i < buffer->size(); i++) {
-        out << buffer->get();
-    }
-    out.close();
-    return 0;
-}
-```
-
-### MML for ensemble
-```C++
-#include <iostream>
-#include <memory>
-#include <fstream>
-#include <inttypes.h>
-#include "YKSConverter/YKSConverter.h"
-
-int main(int argc, const char * argv[]) {
-    std::vector<std::string> mml = {
-        "MML@t180l8ccccccc4,l8eeeeeee4,l8ggggggg4;",
-        "MML@t180l8>ccccccc4,l8>eeeeeee4,l8>ggggggg4;"
-    };
-    std::vector<uint8_t> inst = {26, 74};
-    auto yksConverter = std::make_shared<YKSConverter>(mml, inst);
-    auto buffer = yksConverter->toBuffer();
-    std::ofstream out("./output.midi");
-    for (int i = 0; i < buffer->size(); i++) {
-        out << buffer->get();
-    }
-    out.close();
-    return 0;
-}
-```
-
-### Rust Examples
-
-```rust
-use yks_converter::YksConverter;
-
-fn main() {
-    let mml = "MML@t190l8cdefgab>c4.,l8<cdefgab>c4.,l8>cdefgab>c4.;";
-    let converter = YksConverter::new(mml.to_string(), 1);
-    
-    if let Some(buffer) = converter.to_buffer() {
-        std::fs::write("output.midi", buffer.as_slice()).unwrap();
-    }
-}
-```
-
-### CMake (C++)
-```bash
-cd cpp
-mkdir build && cd build
-cmake ..
-make
-make install
-```
-Install destination: `${ProjectDirectory}/release/`
+### Rust Implementation  
+See [rust/README.md](rust/README.md) for detailed usage examples including:
+- Library usage (add as dependency)
+- Command line tool
+- Single and multi-track examples
 
 ## Development Status
 

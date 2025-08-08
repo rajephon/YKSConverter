@@ -19,24 +19,49 @@ g++ -std=c++11 -I. YKSConverter/*.cpp YKSConverter/MF2TT2MF/*.cpp -o yks_convert
 
 ## Usage
 
-### As Library
+### Single Track Example
 ```cpp
+#include <iostream>
+#include <memory>
+#include <fstream>
+#include <inttypes.h>
 #include "YKSConverter/YKSConverter.h"
 
-int main() {
-    std::string mml = "MML@t120l4cdefgab>c4.,,;";
-    int instrument = 1;
-    
-    auto converter = std::make_shared<YKSConverter>(mml, instrument);
-    auto buffer = converter->toBuffer();
-    
-    // Save to file
-    std::ofstream out("output.midi", std::ios::binary);
+int main(int argc, const char * argv[]) {
+    std::string txtMML = "MML@t190l8cdefgab>c4.,l8<cdefgab>c4.,l8>cdefgab>c4.;";
+    int inst = 1; // instrument code.
+    auto yksConverter = std::make_shared<YKSConverter>(txtMML, inst);
+    auto buffer = yksConverter->toBuffer();
+    std::ofstream out("./output.midi");
     for (int i = 0; i < buffer->size(); i++) {
         out << buffer->get();
     }
     out.close();
-    
+    return 0;
+}
+```
+
+### Multi-Track Example
+```cpp
+#include <iostream>
+#include <memory>
+#include <fstream>
+#include <inttypes.h>
+#include "YKSConverter/YKSConverter.h"
+
+int main(int argc, const char * argv[]) {
+    std::vector<std::string> mml = {
+        "MML@t180l8ccccccc4,l8eeeeeee4,l8ggggggg4;",
+        "MML@t180l8>ccccccc4,l8>eeeeeee4,l8>ggggggg4;"
+    };
+    std::vector<uint8_t> inst = {26, 74};
+    auto yksConverter = std::make_shared<YKSConverter>(mml, inst);
+    auto buffer = yksConverter->toBuffer();
+    std::ofstream out("./output.midi");
+    for (int i = 0; i < buffer->size(); i++) {
+        out << buffer->get();
+    }
+    out.close();
     return 0;
 }
 ```
