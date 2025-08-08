@@ -1,0 +1,18 @@
+[package]
+name = "yks_converter"
+version = "0.1.0"
+edition = "2021"
+description = "Rust port of YKSConverter - MML to MIDI converter"
+license = "BSD-2-Clause"
+
+[dependencies]
+regex = "1.10"
+byteorder = "1.5"
+
+[lib]
+name = "yks_converter"
+crate-type = ["lib"]
+
+[[bin]]
+name = "test_baseline"
+path = "src/bin/test_baseline.rs"
