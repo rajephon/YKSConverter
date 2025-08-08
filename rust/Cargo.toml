@@ -10,6 +10,10 @@ repository = "https://github.com/rajephon/YKSConverter"
 license = "BSD-2-Clause"
 keywords = ["midi", "mml", "music", "converter", "audio"]
 categories = ["multimedia::audio", "parsing"]
+exclude = [
+    "rust_baseline_output.txt",
+    "*.midi"
+]
 
 [dependencies]
 regex = "1.10"
