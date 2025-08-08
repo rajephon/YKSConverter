@@ -50,6 +50,10 @@ jobs:
       working-directory: ./rust
       run: cargo run --bin test_baseline
 
+    - name: Verify publish readiness
+      working-directory: ./rust
+      run: cargo publish --dry-run
+
   test-cpp:
     runs-on: ubuntu-latest
     
