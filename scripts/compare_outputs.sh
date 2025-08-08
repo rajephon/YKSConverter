@@ -3,7 +3,8 @@
 # YKSConverter Output Comparison Script
 # Compares C++ and Rust implementation outputs
 
-set -e
+# Don't exit on errors to see all test results
+set +e
 
 echo "=== YKSConverter Output Comparison ==="
 echo
@@ -50,13 +51,29 @@ compare_baseline_outputs() {
     
     # Generate C++ output
     cd cpp/build
-    ./test_baseline > cpp_baseline_output.txt 2>&1
+    if ! ./test_baseline > cpp_baseline_output.txt 2>&1; then
+        echo -e "${RED}❌ C++ test_baseline failed${NC}"
+        cat cpp_baseline_output.txt
+        cd ../..
+        return 1
+    fi
     cd ../..
     
     # Generate Rust output  
     cd rust
-    cargo run --release --bin test_baseline > rust_baseline_output.txt 2>&1
+    if ! cargo run --release --bin test_baseline > rust_baseline_output.txt 2>&1; then
+        echo -e "${RED}❌ Rust test_baseline failed${NC}"
+        cat rust_baseline_output.txt
+        cd ..
+        return 1
+    fi
     cd ..
+    
+    # Debug: List generated files
+    echo -e "${BLUE}Generated C++ files:${NC}"
+    ls -la cpp/build/*.midi || echo "No C++ MIDI files found"
+    echo -e "${BLUE}Generated Rust files:${NC}"
+    ls -la rust/*.midi || echo "No Rust MIDI files found"
     
     # Compare generated MIDI files
     local files_match=true
