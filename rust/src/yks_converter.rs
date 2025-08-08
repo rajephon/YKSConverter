@@ -1,7 +1,9 @@
 use crate::byte_buffer::ByteBuffer;
 use crate::mf2tt2mf::Mf2tt2mf;
+use crate::errors::ConversionError;
+use crate::constants::{timing, midi};
 
-const START_TIMEBASE: u16 = 96;
+const START_TIMEBASE: u16 = timing::DEFAULT_TIMEBASE;
 
 pub struct YksConverter {
     mml: Vec<String>,
@@ -50,24 +52,40 @@ impl YksConverter {
         &self.inst
     }
 
-    pub fn to_buffer(&self) -> Option<ByteBuffer> {
+    /// Converts MML to MIDI buffer
+    /// 
+    /// # Returns
+    /// 
+    /// Returns `Ok(ByteBuffer)` on success, or `Err(ConversionError)` on failure.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use yks_converter::YksConverter;
+    /// 
+    /// let converter = YksConverter::new("MML@c,,;".to_string(), 1);
+    /// let buffer = converter.to_buffer_result().unwrap();
+    /// ```
+    pub fn to_buffer_result(&self) -> Result<ByteBuffer, ConversionError> {
         if self.mml.len() != self.inst.len() {
-            eprintln!("MML 갯수와 익기 갯수가 다릅니다.");
-            return None;
+            return Err(ConversionError::MmlInstCountMismatch {
+                mml_count: self.mml.len(),
+                inst_count: self.inst.len(),
+            });
         }
 
         let mut byte_buffer = ByteBuffer::new();
 
         // Header Chunk
         let default_buffer = [0x00, 0x00, 0x00, 0x06, 0x00];
-        byte_buffer.put_string("MThd");
+        byte_buffer.put_string(midi::HEADER_CHUNK);
         byte_buffer.put_bytes_array(&default_buffer);
         
         // format: 1 (multiple tracks)
-        byte_buffer.put_byte(1);
+        byte_buffer.put_byte(midi::FORMAT_TYPE as u8);
         
         // track count (2 bytes)
-        byte_buffer.put_u16((self.mml.len() * 3) as u16);
+        byte_buffer.put_u16((self.mml.len() as u16) * midi::TRACKS_PER_MML);
         
         // timebase (2 bytes)  
         byte_buffer.put_u16(self.timebase);
@@ -76,7 +94,7 @@ impl YksConverter {
             let mut mf2tt2mf = Mf2tt2mf::new((i + 1) as u8, self.inst[i], 64, 0);
             
             if !mf2tt2mf.from_mml(mml) {
-                return None;
+                return Err(ConversionError::MmlParseFailed(mml.clone()));
             }
 
             let track_event_list = mf2tt2mf.build();
@@ -95,8 +113,7 @@ impl YksConverter {
 
                     let event_buffer = event.to_buffer();
                     if event_buffer.size() <= 0 {
-                        eprintln!("Event Convert error: {}", event.value());
-                        continue;
+                        return Err(ConversionError::EventConversionFailed(event.value()));
                     }
 
                     let start = event_buffer.get_at(0);
@@ -110,14 +127,28 @@ impl YksConverter {
                     last = start;
                 }
 
-                byte_buffer.put_string("MTrk");
+                byte_buffer.put_string(midi::TRACK_CHUNK);
                 let track_length = track_buffer.size() as u32;
                 byte_buffer.put_u32(track_length);
                 byte_buffer.put_bytes(&track_buffer);
             }
         }
 
-        Some(byte_buffer)
+        Ok(byte_buffer)
+    }
+
+    /// Legacy method for backward compatibility
+    /// 
+    /// This method maintains the original API for existing code.
+    /// For new code, prefer using `to_buffer_result()` for better error handling.
+    pub fn to_buffer(&self) -> Option<ByteBuffer> {
+        match self.to_buffer_result() {
+            Ok(buffer) => Some(buffer),
+            Err(err) => {
+                eprintln!("{}", err);
+                None
+            }
+        }
     }
 }
 

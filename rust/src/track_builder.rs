@@ -1,6 +1,7 @@
 use crate::track_event::*;
 
 pub struct TrackBuilder {
+    #[allow(dead_code)] // Keep for compatibility with C++ version
     channel: u8,
     events: Vec<Box<dyn TrackEvent>>,
 }
