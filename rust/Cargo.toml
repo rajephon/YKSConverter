@@ -2,8 +2,14 @@
 name = "yks_converter"
 version = "0.1.0"
 edition = "2021"
-description = "Rust port of YKSConverter - MML to MIDI converter"
+authors = ["YKSConverter Contributors"]
+description = "A Rust library for converting MML (Music Macro Language) to MIDI format"
+readme = "README.md"
+homepage = "https://github.com/rajephon/YKSConverter"
+repository = "https://github.com/rajephon/YKSConverter"
 license = "BSD-2-Clause"
+keywords = ["midi", "mml", "music", "converter", "audio"]
+categories = ["multimedia::audio", "parsing"]
 
 [dependencies]
 regex = "1.10"
